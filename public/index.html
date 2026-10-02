@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Razorpay Agent Studio - Private Merchant Connector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #080c14;
+      --bg-card: #0f172a;
+      --bg-card-hover: #1e293b;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --primary: #3395ff;
+      --primary-glow: rgba(51, 149, 255, 0.25);
+      --accent-green: #10b981;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(51, 149, 255, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+    }
+
+    header {
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(15, 23, 42, 0.7);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, #0c2340, #3395ff);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px var(--primary-glow);
+    }
+
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      fill: #ffffff;
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+    }
+
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+    }
+
+    .badge-amber .badge-dot { background: var(--accent-amber); box-shadow: 0 0 8px var(--accent-amber); }
+
+    main {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .metric-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .metric-card:hover {
+      border-color: rgba(51, 149, 255, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .metric-title {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-main);
+      font-family: var(--font-mono);
+    }
+
+    .metric-sub {
+      font-size: 0.75rem;
+      color: var(--accent-green);
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.02);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-header h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    select, input, textarea {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s ease;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 10px var(--primary-glow);
+    }
+
+    textarea {
+      font-family: var(--font-mono);
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #1d4ed8, #3395ff);
+      color: white;
+      border: none;
+      padding: 0.85rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px var(--primary-glow);
+    }
+
+    .btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-color);
+      box-shadow: none;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .code-box {
+      background: #04070d;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: #38bdf8;
+      max-height: 380px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+
+    .progress-bar-container {
+      height: 8px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #3395ff);
+      width: 100%;
+      transition: width 0.3s ease;
+    }
+
+    .tab-container {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 1rem;
+    }
+
+    .tab-btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .tab-btn.active {
+      background: rgba(51, 149, 255, 0.15);
+      border-color: rgba(51, 149, 255, 0.3);
+      color: var(--primary);
+    }
+
+    footer {
+      border-top: 1px solid var(--border-color);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .tag {
+      font-size: 0.72rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .tag-blue { background: rgba(51, 149, 255, 0.2); color: #60a5fa; }
+    .tag-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .tag-amber { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1>Razorpay Agent Studio</h1>
+        <p>Private Merchant Connector (WooCommerce MCP)</p>
+      </div>
+    </div>
+
+    <div class="header-badges">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        <span>MCP Server Active</span>
+      </div>
+      <div class="badge" id="authModeBadge">
+        <span class="tag tag-blue">API-Key (HMAC)</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Top Stat Cards -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-title">Orders Tracked</span>
+        <span class="metric-value" id="statOrdersCount">5</span>
+        <span class="metric-sub">Synced with Razorpay Payments</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Active SKUs</span>
+        <span class="metric-value" id="statInventoryCount">5</span>
+        <span class="metric-sub">Real-time Stock Monitor</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Rate Limit Tokens</span>
+        <span class="metric-value" id="statTokens">15.0 / 15</span>
+        <div class="progress-bar-container" style="margin-top: 4px;">
+          <div class="progress-bar-fill" id="tokenProgressFill" style="width: 100%;"></div>
+        </div>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Circuit Breaker</span>
+        <span class="metric-value" id="statCircuit" style="color: var(--accent-green);">CLOSED</span>
+        <span class="metric-sub">Zero Service Failures</span>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="content-grid">
+      
+      <!-- Left Panel: Interactive Agent Studio Tool Playground -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            Agent Studio Tool Playground
+          </h2>
+          <span class="tag tag-green">MCP Tool Exec</span>
+        </div>
+
+        <div class="panel-body">
+          <div class="form-group">
+            <label for="mcpToolSelect">Select Agent Primitive Tool</label>
+            <select id="mcpToolSelect">
+              <option value="woocommerce_list_orders">woocommerce_list_orders (List & filter orders)</option>
+              <option value="woocommerce_get_order">woocommerce_get_order (Get single order by ID)</option>
+              <option value="woocommerce_search_orders">woocommerce_search_orders (Search orders by query)</option>
+              <option value="woocommerce_list_inventory">woocommerce_list_inventory (List inventory & stock)</option>
+              <option value="woocommerce_get_product">woocommerce_get_product (Get product by SKU/ID)</option>
+              <option value="woocommerce_search_inventory">woocommerce_search_inventory (Search inventory)</option>
+              <option value="merchant_list_tickets">merchant_list_tickets (List support tickets)</option>
+              <option value="merchant_get_ticket">merchant_get_ticket (Get support ticket)</option>
+              <option value="merchant_search_tickets">merchant_search_tickets (Search tickets)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="toolPayload">Tool Input Arguments (JSON)</label>
+            <textarea id="toolPayload">{\n  "status": "processing",\n  "limit": 5\n}</textarea>
+          </div>
+
+          <div style="display: flex; gap: 10px;">
+            <button class="btn" id="btnRunTool">
+              <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+              Execute MCP Tool
+            </button>
+            <button class="btn btn-secondary" id="btnPresetPaid">Preset: Unpaid Orders</button>
+            <button class="btn btn-secondary" id="btnPresetLowStock">Preset: Low Stock</button>
+          </div>
+
+          <div class="form-group">
+            <label style="display: flex; justify-content: space-between;">
+              <span>Execution Output & Metadata</span>
+              <span id="execMeta" style="color: var(--primary);">0ms | Token Remaining: 15.0</span>
+            </label>
+            <div class="code-box" id="toolOutput">Click "Execute MCP Tool" to test primitive execution...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Authentication & Resilience Configurator -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>
+            <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 15v2m-6 4h12a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2zm10-10V7a4 4 0 0 0-8 0v4h8z"/></svg>
+            Connector Authentication & Rate Limiting
+          </h2>
+          <span class="tag tag-amber">Resilience Active</span>
+        </div>
+
+        <div class="panel-body">
+          <div class="tab-container">
+            <button class="tab-btn active" id="tabAuth">Auth Config</button>
+            <button class="tab-btn" id="tabRate">Rate Limiter</button>
+            <button class="tab-btn" id="tabSchema">MCP Tool Schema</button>
+          </div>
+
+          <!-- Auth Tab Content -->
+          <div id="authContent" class="panel-body" style="padding:0;">
+            <div class="form-group">
+              <label for="authTypeSelect">Authentication Type</label>
+              <select id="authTypeSelect">
+                <option value="api_key">WooCommerce API-Key (HMAC / Basic Auth Header)</option>
+                <option value="oauth2">OAuth 2.0 (Bearer Token with Automatic Refresh)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="storeUrlInput">WooCommerce Store URL</label>
+              <input type="text" id="storeUrlInput" value="https://store.merchant.example.com">
+            </div>
+
+            <div class="form-group" id="apiKeyFields">
+              <label for="ckInput">Consumer Key (ck_...)</label>
+              <input type="text" id="ckInput" value="ck_live_99a88b77c66d55e44">
+              <label for="csInput" style="margin-top:8px;">Consumer Secret (cs_...)</label>
+              <input type="password" id="csInput" value="cs_live_112233445566778899">
+            </div>
+
+            <button class="btn" id="btnValidateAuth">Validate Auth Credentials</button>
+            <div class="code-box" id="authValidationStatus" style="max-height: 100px; color: var(--accent-green);">Auth status: Ready</div>
+          </div>
+
+          <!-- Rate Tab Content (Hidden initially) -->
+          <div id="rateContent" class="panel-body" style="padding:0; display:none;">
+            <div class="form-group">
+              <label>Token Bucket Status</label>
+              <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <p style="font-size: 0.85rem; margin-bottom: 6px;">Fill Rate: <strong>60 requests / min</strong> (1.0 token/sec)</p>
+                <p style="font-size: 0.85rem; margin-bottom: 6px;">Burst Max Capacity: <strong>15 tokens</strong></p>
+                <p style="font-size: 0.85rem; margin-bottom: 6px;">Retry Policy: <strong>Exponential Backoff + Full Jitter (Max 3 retries)</strong></p>
+                <p style="font-size: 0.85rem;">Circuit Breaker Failure Threshold: <strong>5 consecutive 5xx errors</strong></p>
+              </div>
+            </div>
+            <button class="btn btn-secondary" id="btnSimulateBurst">Simulate Rapid 10 Requests Burst</button>
+          </div>
+
+          <!-- Schema Tab Content -->
+          <div id="schemaContent" class="panel-body" style="padding:0; display:none;">
+            <div class="form-group">
+              <label>Exposed MCP Tools JSON Schema</label>
+              <div class="code-box" id="schemaBox">Loading tools schema...</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>Razorpay Agent Studio - Forward Deployed Engineer Assignment Submission &bull; WooCommerce & Merchant Tools Connector</p>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
